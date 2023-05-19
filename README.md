@@ -9,7 +9,7 @@ A backend application for a food ordering app that handles the server-side funct
 
 # Installation
   1. Clone the repository:
-  git clone <repository-url>
+  git clone repository-url
  
   2. Navigate to the project directory:
   cd madam-food-app-backend
@@ -36,3 +36,6 @@ The server will start running on the specified port (configured via the PORT env
 
 # Error Handling
 The backend application includes a global error handling middleware to handle any unhandled errors. All errors are properly formatted and returned as JSON responses.
+
+# Contributing
+If you would like to contribute to this project, please follow the guidelines outlined in the CONTRIBUTING.md file.

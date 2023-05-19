@@ -16,7 +16,7 @@ A backend application for a food ordering app that handles the server-side funct
 
   3. Install dependencies:
   npm install
-
+  
 # Environment Configuration
   1. Create a .env file in the root directory of the project.
   2. Set the following environment variables in the .env file:

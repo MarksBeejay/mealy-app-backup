@@ -20,9 +20,9 @@ A backend application for a food ordering app that handles the server-side funct
 # Environment Configuration
   1. Create a .env file in the root directory of the project.
   2. Set the following environment variables in the .env file:
-  PORT=<port-number>
-  DATABASE_URL=<database-connection-url>
-  JWT_SECRET=<jwt-secret-key>
+  PORT = port-number
+  DATABASE_URL = database-connection-url
+  JWT_SECRET = jwt-secret-key
   
 # Database Setup
   1. Create a new database for the application.

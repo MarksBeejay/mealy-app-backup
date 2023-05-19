@@ -2,7 +2,7 @@
 MADAM Food Ordering App
 
 # About MADAM
-MADAM is a food ordering app that aims to provide a user-friendly platform for easily ordering food and drinks from a mobile device, ensuring a seamless user experience. MADAM offers a convinient and efficient online ordering system for restaurants and cafes. By patnering with local businesses, MADAM helps these establishments reach a wider audience and increase their sales. Additionally, MADAM caters to individuals with health and dietary conditions, allowing them to customize their orders according to their preferences and specific needs.
+MADAM is a food ordering app that aims to provide a user-friendly platform for easily ordering food and drinks from a mobile device, ensuring a seamless user experience. MADAM offers a convenient and efficient online ordering system for restaurants and cafes. By partnering with local businesses, MADAM helps these establishments reach a wider audience and increase their sales. Additionally, MADAM caters to individuals with health and dietary conditions, allowing them to customize their orders according to their preferences and specific needs.
 
 # Description
 A backend application for a food ordering app that handles the server-side functionality.

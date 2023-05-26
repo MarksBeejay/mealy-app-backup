@@ -28,7 +28,7 @@ const sendResetEmail = (email, token) => {
   });
 
   const mailOptions = {
-    from: 'makanjuolabolaji9898',
+    from: 'makanjuolabolaji9898@gmail.com',
     to: email,
     subject: 'Password Reset',
     text: `Please click the following link to reset your password: ${token}`,
@@ -42,6 +42,35 @@ const sendResetEmail = (email, token) => {
     }
   });
 };
+
+
+// Send password change confirmation email
+const sendConfirmationEmail = (email) => {
+  const transporter = nodemailer.createTransport({
+    // Configure nodemailer with your email provider details
+    service: 'gmail',
+    auth: {
+      user: 'makanjuolabolaji9898@gmail.com',
+      pass: 'ikotrdfmgxvpanhw',
+    },
+  });
+
+  const mailOptions = {
+    from: 'makanjuolabolaji9898@gmail.com',
+    to: email,
+    subject: 'Password Change Confirmation',
+    text: 'Your password has been successfully updated.',
+  };
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.error(error);
+    } else {
+      console.log('Confirmation email sent: ' + info.response);
+    }
+  });
+};
+
 
 // Handle password reset request
 router.post('/forgot-password', validateEmail, async (req, res) => {
@@ -92,13 +121,13 @@ router.post('/reset-password/:token', validateResetToken, validatePassword, asyn
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(req.body.password, salt); // Generate a hash of the new password
     user.password = hashedPassword;
-    // user.password = password;
     user.resetToken = undefined;
     user.resetTokenExpiry = undefined;
 
-    
-
     await user.save();
+
+    // Send password change confirmation email
+    sendConfirmationEmail(user.email);
 
     res.json({ message: 'Password reset successful' });
   } catch (error) {

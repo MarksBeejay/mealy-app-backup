@@ -1,33 +1,17 @@
-const { sendConfirmationEmail } = require('../utils/emailUtils');
-const auth = require('../middlewares/auth');
-const jwt = require('jsonwebtoken');
-const config = require('config');
+const {validateUser, validateConfirmationToken} = require('../validators/validationMiddleware');
+const { sendConfirmationTokenEmail, sendAccountConfirmationSuccess } = require('../utils/emailUtils');
 const bcrypt = require('bcrypt');
-const crypto = require('crypto');
+const {generateToken} = require('../utils/cryptoToken')
 const _ = require('lodash');
-const {User, validate, validateConfirmation} = require('../models/User');
-const mongoose = require('mongoose');
+const {User} = require('../models/User');
 const express = require('express');
 const router = express.Router();
 
-const generateToken = () => {
-  return crypto.randomBytes(20).toString('hex');
-};
 
-router.get('/finduser', auth, async (req, res) => {
-  try{
-  const user = await User.findById(req.user._id).select('-password');
-  res.send(user);
-} catch (error) {
-  console.error(error);
-  res.status(500).json({ error: 'Server error' });
-}
-});
 
-router.post('/registeruser', async (req, res) => {
+//register new user account
+router.post('/registeruser', validateUser, async (req, res) => {
   try{
-  const { error } = validate(req.body); 
-  if (error) return res.status(400).send(error.details[0].message);
 
   const { name, username, email, password } = req.body; // Extract the name property
 
@@ -37,14 +21,6 @@ router.post('/registeruser', async (req, res) => {
   user = new User(_.pick(req.body, ['name','username', 'email', 'password']));
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
-  // user.password = await bcrypt.hash(user.password, salt);
-  // await user.save();
-
-  // const token = user.generateAuthToken();
-  // res.header('x-auth-token', token).status(201).send({
-  //   message: 'Account created successfully',
-  //   user: _.pick(user, ['_id', 'name', 'email'])
-  // });
 
       // Create a confirmation token
       const confirmationToken = generateToken(); // Generate a unique token
@@ -62,22 +38,26 @@ router.post('/registeruser', async (req, res) => {
       await user.save();
   
       // Send confirmation email
-      await sendConfirmationEmail(user.email, user.confirmationToken);
+      await sendConfirmationTokenEmail(user.email, user.confirmationToken);
   
-      res.status(201).json({ message: 'Account created successfully' });
+      res.status(201).json({ message: 'Account created successfully and confirmation email sent' });
 
-} catch (error) {
-  console.error(error);
-  res.status(500).json({ error: 'Server error' });
-}
-});
+    } catch (error) {
+      if (error.code === 11000) {
+        // Duplicate key error
+        res.status(400).json({ error: 'Username already taken.' });
+      } else {
+        // Other database errors
+        console.error(error);
+        res.status(500).json({ error: 'Server error' });
+      }
+    }
+  });
 
 
 // User account confirmation endpoint
-router.post('/confirm-account', async (req, res) => {
+router.post('/confirm-account', validateConfirmationToken, async (req, res) => {
   try {
-    const { error } = validateConfirmation(req.body); 
-  if (error) return res.status(400).send(error.details[0].message);
 
     const { email, confirmationToken } = req.body;
 
@@ -92,6 +72,8 @@ router.post('/confirm-account', async (req, res) => {
     user.isConfirmed = true;
     user.confirmationToken = undefined;
     await user.save();
+
+    await sendAccountConfirmationSuccess(user.email);
 
     res.json({ message: 'Account confirmed successfully' });
   } catch (error) {

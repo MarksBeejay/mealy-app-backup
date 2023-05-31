@@ -1,6 +1,3 @@
-const config = require('config');
-const jwt = require('jsonwebtoken');
-const Joi = require('joi');
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
@@ -22,7 +19,13 @@ const userSchema = new mongoose.Schema({
     required: true,
     minlength: 5,
     maxlength: 255,
-    unique: true
+    trim: true,
+    lowercase: true,
+    unique: true,
+    validate: {
+      validator: (value) => /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/.test(value),
+      message: 'Invalid email format',
+  },
   },
   password: {
     type: String,
@@ -38,40 +41,16 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  authToken: {
+    type: String,
+    default: null,
+},
   confirmationToken: String,
   resetToken: String,
   resetTokenExpiry: Date,
   isAdmin: Boolean
 });
 
-userSchema.methods.generateAuthToken = function() { 
-  const token = jwt.sign({ _id: this._id, isAdmin: this.isAdmin }, config.get('jwtPrivateKey'));
-  return token;
-}
-
 const User = mongoose.model('User', userSchema);
 
-function validateUser(user) {
-  const schema = Joi.object({
-    name: Joi.string().min(5).max(50).required(),
-    username: Joi.string().min(5).max(50).required(),
-    email: Joi.string().min(5).max(255).required().email(),
-    password: Joi.string().min(5).max(255).required()
-  });
-
-  return schema.validate(user);
-}
-
-function validateConfirmationToken(user) {
-  const schema = Joi.object({
-    email: Joi.string().min(5).max(255).required().email(),
-    confirmationToken: Joi.string().required()
-  });
-
- return schema.validate(user);
-}
-
-
 exports.User = User; 
-exports.validate = validateUser;
-exports.validateConfirmation = validateConfirmationToken;

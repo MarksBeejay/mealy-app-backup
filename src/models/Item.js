@@ -4,22 +4,33 @@ const itemSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
-    lowercase: true, // Convert the value to lowercase
+    lowercase: true, 
   },
+  restaurant: {
+    type: String,
+    required: true,
+    lowercase: true, 
+  },
+  description: {
+    type: String,
+    required: true,
+    lowercase: true, 
+  },
+  mainIngredients: [{
+    type: String,
+    required: true,
+    lowercase: true, 
+  }],
   category: {
     type: String,
     required: true,
-    lowercase: true, // Convert the value to lowercase
+    //default: undefined
+    lowercase: true,
   },
   price: {
     type: Number,
     required: true,
   },
-  dietaryPreferences: [{
-    type: String,
-    lowercase: true, // Convert the values to lowercase
-    default: undefined
-  }],
 });
 
 const Item = mongoose.model('Item', itemSchema);

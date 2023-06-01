@@ -1,5 +1,6 @@
 const express = require('express');
-const { validateItemCreation, validateItemFilter, validateItemCategory } = require('../validators/validationMiddleware');
+const { validateItemCreation, validateItemFilter, validateItemCategory, 
+  validateItemDetails, validateItemCustomization } = require('../validators/validationMiddleware');
 const router = express.Router();
 const {Item} = require('../models/item');
 
@@ -7,14 +8,16 @@ const {Item} = require('../models/item');
 // Route to create a new item
 router.post('/create', validateItemCreation, async (req, res) => {
   try {
-    const { name, category, price, dietaryPreferences } = req.body;
+    const { name, restaurant, description, mainIngredients, category, price, } = req.body;
 
     // Create a new item instance
     const newItem = new Item({
       name,
+      restaurant,
+      description,
+      mainIngredients,
       category,
       price,
-      dietaryPreferences,
     });
 
     // Save the item to the database
@@ -49,14 +52,27 @@ router.get('/all', async (req, res) => {
 // Route to handle item filtering
 router.get('/filter', validateItemFilter, async (req, res) => {
   try {
-    let { category, price, dietaryPreferences } = req.query;
+    let { name, restaurant, description, mainIngredients, category, price } = req.query;
 
      // Convert query parameters to lowercase
+     name = name ? name.toLowerCase() : null;
+     restaurant = restaurant ? restaurant.toLowerCase() : null;
+     description = description ? description.toLowerCase() : null;
      category = category ? category.toLowerCase() : null;
-     dietaryPreferences = dietaryPreferences ? dietaryPreferences.toLowerCase() : null;
+     price = price ? price.toLowerCase() : null;
+     mainIngredients = mainIngredients ? mainIngredients.toLowerCase() : null;
 
     let filters = {};
 
+    if (name) {
+      filters.name = name.toLowerCase();
+    }
+    if (restaurant) {
+      filters.restaurant = restaurant.toLowerCase();
+    }
+    if (description) {
+      filters.description = description.toLowerCase();
+    }
     if (category) {
       filters.category = category.toLowerCase();
     }
@@ -74,9 +90,9 @@ router.get('/filter', validateItemFilter, async (req, res) => {
       }
     }
 
-    if (dietaryPreferences) {
-      let lowercaseDietaryPreferences = dietaryPreferences.split(',').map(preference => preference.toLowerCase());
-      filters.dietaryPreferences = { $in: lowercaseDietaryPreferences };
+    if (mainIngredients) {
+      let lowercasemainIngredients = mainIngredients.split(',').map(ingredients => ingredients.toLowerCase());
+      filters.mainIngredients = { $in: lowercasemainIngredients };
     }
 
     const filteredItems = await Item.find(filters);
@@ -135,6 +151,55 @@ router.get('/categories', async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Failed to fetch categories' });
+  }
+});
+
+// Define the route for item details
+router.get('/details/:itemId', validateItemDetails, async (req, res) => {
+  try {
+    const { itemId } = req.params;
+
+    // Find the item by its ID
+    const item = await Item.findById(itemId);
+
+    if (!item) {
+      return res.status(404).json({ error: 'Item not found' });
+    }
+
+    // Return the item details
+    res.json(item);
+  } catch (error) {
+    // Handle any errors
+    res.status(500).json({ error: 'Failed to fetch item details' });
+  }
+});
+
+
+// Define the route for item customization
+router.put('/details/:itemId/customize', validateItemCustomization, async (req, res) => {
+  try {
+    const { itemId } = req.params;
+
+    // Find the item by its ID
+    let item = await Item.findByIdAndUpdate(itemId, {...req.body}, {new: true});
+
+    if (!item) {
+      return res.status(404).json({ error: 'Item not found' });
+    }
+
+    // Save the updated item in the database
+    const updatedItem = await item.save();
+
+    // Return the updated item
+    res.status(200).json({
+      status: true,
+      message: 'Item details updated successfully',
+      data: updatedItem,
+    });
+
+  } catch (error) {
+    // Handle any errors
+    res.status(500).json({ error: 'Failed to update item details' });
   }
 });
 

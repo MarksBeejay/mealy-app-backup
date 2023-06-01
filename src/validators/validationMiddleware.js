@@ -80,9 +80,11 @@ const validateResetToken = (req, res, next) => {
 const validateItemCreation = (req, res, next) => {
   const schema = Joi.object({
       name: Joi.string().required(),
+      restaurant: Joi.string().required(),
+      description: Joi.string().required(),
+      mainIngredients: Joi.array(), //Joi.string().required(),
       category: Joi.string().required(),
-      price: Joi.number().required(),
-      dietaryPreferences: Joi.array(),
+      price: Joi.number().positive().required(), //.pattern(/^\d+(\.\d{1,2})?-\d+(\.\d{1,2})?$/)
     });
   
     const { error } = schema.validate(req.body);
@@ -94,14 +96,14 @@ const validateItemCreation = (req, res, next) => {
 }
 
 
-
-
 const validateItemFilter = (req, res, next) => {
-
   const schema = Joi.object({
+    name: Joi.string(),
+    restaurant: Joi.string(),
+    description: Joi.string(),
+    mainIngredients: Joi.array(), //Joi.string().required(),
     category: Joi.string().lowercase(),
     price: Joi.number().min(0), //.pattern(/^\d+(\.\d{1,2})?-\d+(\.\d{1,2})?$/)
-    dietaryPreferences: Joi.string(), //Joi.array().items(Joi.string().lowercase()
   });
   const { error } = schema.validate(req.query);
 
@@ -127,5 +129,40 @@ const validateItemCategory = (req, res, next) => {
   next();
 };
 
+
+// Validation schema for item details request
+const validateItemDetails = (req, res, next) => {
+  const schema = Joi.object({
+    itemId: Joi.string().required(),
+  });
+
+  const { error } = schema.validate(req.params);
+
+  if (error) {
+    return res.status(400).json({ error: error.details[0].message });
+  }
+
+  next();
+};
+
+const validateItemCustomization = (req, res, next) => {
+  const schema = Joi.object({
+    name: Joi.string().required(),
+    restaurant: Joi.string().required(),
+    description: Joi.string().required(),
+    mainIngredients: Joi.array(), //Joi.string().required(),
+    category: Joi.string().required(),
+    price: Joi.number().positive().required(), //.pattern(/^\d+(\.\d{1,2})?-\d+(\.\d{1,2})?$/)
+  });
+
+  const { error } = schema.validate(req.body);
+
+  if (error) {
+    return res.status(400).json({ error: error.details[0].message });
+  }
+
+  next();
+};
+
 module.exports = { validateEmail, validatePassword, validateResetToken, validateUser, 
-  validateConfirmationToken, validateItemCreation, validateItemCategory, validateItemFilter };
+  validateConfirmationToken, validateItemCreation, validateItemCategory, validateItemFilter, validateItemDetails, validateItemCustomization };

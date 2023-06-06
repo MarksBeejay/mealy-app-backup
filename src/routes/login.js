@@ -52,9 +52,10 @@ function validateUser(user) {
 router.get('/finduser', auth, async (req, res) => {
   try{
   const userId = req.user._id;
-  const user = await User.findById(userId).select('-password -authToken');
+  const user = await User.findById(userId).select('-password -authToken -confirmPassword');
 
-  res.json({
+  res.status(200).json({
+    message:'Welcome to mealy app',
     data: user
   });
 

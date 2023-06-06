@@ -1,3 +1,7 @@
+const passport = require('./passport');
+
+const session = require('express-session');
+
 require('dotenv').config();
 
 const express = require('express');
@@ -23,6 +27,19 @@ const app = express();
 
 // Middleware
 app.use(express.json());
+
+
+
+// Configure Express session
+app.use(session({
+  secret: 'your-secret-key',
+  resave: false,
+  saveUninitialized: true
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
 
 // Routes
 app.use('/password', forgotPassword);

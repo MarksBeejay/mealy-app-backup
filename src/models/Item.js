@@ -31,6 +31,11 @@ const itemSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  customization: {
+    type: String,
+    default: undefined,
+    lowercase: true,
+  },
 });
 
 const Item = mongoose.model('Item', itemSchema);

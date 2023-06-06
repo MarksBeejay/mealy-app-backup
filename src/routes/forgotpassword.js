@@ -41,22 +41,26 @@ router.post('/forgot-password', validateEmail, async (req, res) => {
 router.post('/reset-password/:token', validateResetToken, validatePassword, async (req, res) => {
   try {
     const { token } = req.params;
-    const { password } = req.body;
+    const { password, confirmPassword } = req.body;
 
     // Find the user with the given reset token and check its expiry
     const user = await User.findOne({
       resetToken: token,
       resetTokenExpiry: { $gt: Date.now() },
     });
-
+    
     if (!user) {
       return res.status(400).json({ error: 'Invalid or expired token' });
     }
 
+    if(password !== confirmPassword) return res.status(403).send('Password mismatch');
+    
     // Update the user's password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(req.body.password, salt); // Generate a hash of the new password
+    const hashedConfirmPassword = await bcrypt.hash(req.body.confirmPassword, salt)
     user.password = hashedPassword;
+    user.confirmPassword = hashedConfirmPassword;
     user.resetToken = undefined;
     user.resetTokenExpiry = undefined;
 

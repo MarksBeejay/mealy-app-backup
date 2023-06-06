@@ -7,7 +7,8 @@ const validateUser = (req, res, next) => {
       name: Joi.string().min(5).max(50).required(),
       username: Joi.string().min(5).max(50).required(),
       email: Joi.string().min(5).max(255).required().email(),
-      password: Joi.string().min(5).max(255).required()
+      password: Joi.string().min(5).max(255).required(),
+      confirmPassword: Joi.string().min(5).max(255).required()
     });
   
     const { error } = schema.validate(req.body);
@@ -51,12 +52,13 @@ const validateEmail = (req, res, next) => {
 // Validate password for password reset
 const validatePassword = (req, res, next) => {
   const schema = Joi.object({
-    password: Joi.string().min(6).required(),
+    password: Joi.string().min(5).max(255).required(),
+    confirmPassword: Joi.string().min(5).max(255).required()
   });
 
   const { error } = schema.validate(req.body);
   if (error) {
-    return res.status(400).json({ error: 'Invalid password' });
+    return res.status(400).json(error.details[0].message);
   }
 
   next();

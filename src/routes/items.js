@@ -34,6 +34,9 @@ router.post('/create', validateItemCreation, async (req, res) => {
   }
 });
 
+
+
+//Route to get all items
 router.get('/all', async (req, res) => {
   try{
     const items = await Item.find()//.select('name price category dietaryPreferences');
@@ -142,6 +145,7 @@ router.put('/categorization/:itemId', validateItemCategory, async (req, res) => 
   }
 });
 
+
 // Route to get all available categories
 router.get('/categories', async (req, res) => {
   try {
@@ -153,6 +157,7 @@ router.get('/categories', async (req, res) => {
     res.status(500).json({ message: 'Failed to fetch categories' });
   }
 });
+
 
 // Define the route for item details
 router.get('/details/:itemId', validateItemDetails, async (req, res) => {
@@ -175,8 +180,9 @@ router.get('/details/:itemId', validateItemDetails, async (req, res) => {
 });
 
 
-// Define the route for item customization
-router.put('/details/:itemId/customize', validateItemCustomization, async (req, res) => {
+
+// Define the route for item customization by restaurant
+router.put('/:itemId/customize', validateItemCustomization, async (req, res) => {
   try {
     const { itemId } = req.params;
 
@@ -193,7 +199,7 @@ router.put('/details/:itemId/customize', validateItemCustomization, async (req, 
     // Return the updated item
     res.status(200).json({
       status: true,
-      message: 'Item details updated successfully',
+      message: 'Item details updated successfully new',
       data: updatedItem,
     });
 
@@ -202,5 +208,37 @@ router.put('/details/:itemId/customize', validateItemCustomization, async (req, 
     res.status(500).json({ error: 'Failed to update item details' });
   }
 });
+
+
+
+// POST route for item customization by user
+router.post('/customize/:id', async (req, res) => {
+  try {
+    const itemId = req.params.id; // Corrected the parameter name to 'id'
+    const customization = req.body.customization;
+
+    // Update the item's customization attribute
+    await Item.findByIdAndUpdate(itemId, { customization });
+
+    // Find the updated item
+    const updatedItem = await Item.findById(itemId);
+
+    // Save the updated item in the database
+    await updatedItem.save(); // Call save on the instance of Item
+
+    res.status(200).json({
+      message: 'Item customization updated successfully',
+      data: updatedItem,
+    });
+  } catch (error) {
+    console.error('Error updating item customization:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
+
+
+
 
 module.exports = router;
